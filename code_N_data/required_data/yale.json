@@ -1,0 +1,12 @@
+{"index": {"_index":"yale","_type":"uni","_id":"5"}}
+{"name":"Donald Rex","role":"student","major":"Pre Med","interests":["drones","travel","reading"],"gender":"male"}
+{"index": {"_index":"yale","_type":"uni","_id":"2"}}
+{"name":"Jamie Choe","role":"student","major":"Philosophy","interests":["Netflix","travel"],"gender":"female"}
+{"index": {"_index":"yale","_type":"uni","_id":"4"}}
+{"name":"Gordon Smith","role":"student","major":"Computer Science","interests":["drones","Netflix","travel"],"gender":"male"}
+{"index": {"_index":"yale","_type":"uni","_id":"6"}}
+{"name":"Mora Barnes","role":"student","major":"Pre Law","interests":["yoga","travel","reading"],"gender":"female"}
+{"index": {"_index":"yale","_type":"uni","_id":"1"}}
+{"name":"Cindy Liu","role":"student","major":"Biology","interests":["art","travel","anatomy"],"gender":"female"}
+{"index": {"_index":"yale","_type":"uni","_id":"3"}}
+{"name":"Andy James","role":"student","major":"Computer Science","interests":["online games","Netflix","travel"],"gender":"male"}

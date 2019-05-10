@@ -1,0 +1,91 @@
+#Download data###################################################################################
+https://download.elastic.co/demos/machine_learning/gettingstarted/server_metrics.tar.gz
+
+# I strongly encourage you to study the content of these files because it sets the tone for understanding 
+# how ML model training and subsequent usage works.
+
+
+
+
+#Create Index in Kibana###########################################################################
+PUT /INDEX_NAME
+{
+   "settings":{
+      "number_of_shards":1,
+      "number_of_replicas":0
+   },
+   "mappings":{
+      "metric":{
+         "properties":{
+            "@timestamp":{
+               "type":"date"
+            },
+            "accept":{
+               "type":"long"
+            },
+            "deny":{
+               "type":"long"
+            },
+            "host":{
+               "type":"keyword"
+            },
+            "response":{
+               "type":"float"
+            },
+            "service":{
+               "type":"keyword"
+            },
+            "total":{
+               "type":"long"
+            }
+         }
+      }
+   }
+}
+
+
+
+
+
+
+
+#BULK INDEX from command line###########################################################################
+curl -u elastic:changeme -X POST -H "Content-Type: application/json" http://localhost:9200/INDEX_NAME/_bulk --data-binary "@server-metrics_1.json"
+
+curl -u elastic:changeme -X POST -H "Content-Type: application/json" http://localhost:9200/INDEX_NAME/_bulk --data-binary "@server-metrics_2.json"
+
+curl -u elastic:changeme -X POST -H "Content-Type: application/json" http://localhost:9200/INDEX_NAME/_bulk --data-binary "@server-metrics_3.json"
+
+curl -u elastic:changeme -X POST -H "Content-Type: application/json" http://localhost:9200/INDEX_NAME/_bulk --data-binary "@server-metrics_4.json"
+
+
+
+
+
+
+
+#create index pattern (kibana)###########################################################################
+#Management -> Index Patterns -> Create Index -> server-*
+
+
+
+#Excerpt from data######################################################################################
+
+{"index": {"_index":"server-metrics","_type":"metric","_id":"226906"}}
+{"@timestamp":"2017-03-31T00:09:00","accept":57066,"deny":3481,"host":"server_1","response":2.0525069614,
+"service":"app_1","total":60547}
+{"index": {"_index":"server-metrics","_type":"metric","_id":"226907"}}
+{"@timestamp":"2017-03-31T00:09:00","accept":13826,"deny":1680,"host":"server_2","response":2.2587476564,
+"service":"app_4","total":15506}
+
+
+
+
+#Posting data to a job#################################################################################
+$ curl -s -H "Content-type: application/json"
+-X POST http://localhost:9200/_xpack/ml/anomaly_detectors/ML_JOB_NAME_HERE/_data
+--data-binary @DATA_FILE_NAME.json
+
+
+#Note - data must be posted to ml jobs in JSON format
+#Note - to avoid having too many open one time jobs, a job is closed when the designated time span has elasped

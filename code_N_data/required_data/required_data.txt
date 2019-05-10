@@ -1,0 +1,21 @@
+#######This data is needed to duplicate various lessons in this course##########
+#data for bulk add
+# see havard.json and yale.json files
+
+
+#create index harvard and yale
+
+#create harvard index
+PUT /harvard
+
+#create yale index
+PUT /yale
+
+#NOTE: Make sure the harvard.json and yale.json files are in the elasticsearch root directory
+
+#BULK INDEX harvard from command line #############################################
+curl -u elastic:PASSWORD_HERE -X POST -H "Content-Type: application/json" http://localhost:9200/harvard/_bulk --data-binary "@harvard.json"
+
+#BULK INDEX yale from command line #############################################
+curl -u elastic:PASSWORD_HERE -X POST -H "Content-Type: application/json" http://localhost:9200/yale/_bulk --data-binary "@yale.json"
+###################################################################################

@@ -1,0 +1,14 @@
+{"index": {"_index":"harvard","_type":"uni","_id":"5"}}
+{"name":"William Spence","role":"student","major":"File Studies","interests":["indie films","Netflix","traveling","languages"],"gender":"male"}
+{"index": {"_index":"harvard","_type":"uni","_id":"2"}}
+{"name":"Mary Jones","role":"student","major":"Statistics","interests":["drones","travel"],"gender":"female"}
+{"index": {"_index":"harvard","_type":"uni","_id":"4"}}
+{"name":"Jane Jones","role":"student","major":"Chinese","interests":["movies","Netflix","traveling"],"gender":"female"}
+{"index": {"_index":"harvard","_type":"uni","_id":"6"}}
+{"name":"Emily Moore","role":"student","major":"Sports Medicine","interests":["Cricket","NFL","Netflix","traveling"],"gender":"female"}
+{"index": {"_index":"harvard","_type":"uni","_id":"1"}}
+{"name":"Michael Smith","role":"student","major":"Biology","interests":["art","video games","travel"],"gender":"male"}
+{"index": {"_index":"harvard","_type":"uni","_id":"3"}}
+{"name":"Vincent Moore","role":"student","major":"English","interests":["reading","Netflix"],"gender":"male"}
+
+ 

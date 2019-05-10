@@ -1,0 +1,408 @@
+#Managing Indices
+
+#2.2 
+#Adding an Alias by Example
+POST /_aliases
+{
+	“actions”: [
+		{“add”: {“index”: “harvard”,”alias”:”university”}}
+	]
+}
+
+#Removing an Alias by Exmaple
+POST /_aliases
+{
+	“actions”: [
+		{“add”: {“index”: “harvard”,”alias”:”university”}}
+	]
+}
+
+
+#Adding Multiple Indices to an Alias by Example
+POST /_aliases
+{
+	“actions”: [
+		{“add”: {“index”: “harvard”,”alias”:”university”}},
+		{“add”: {“index”: “stanford”,”alias”:”university”}},
+		{“add”: {“index”: “georgetown”,”alias”:”university”}}
+	]
+}
+
+#Renaming an Alias by Example
+POST /_aliases
+{
+	“actions”: [
+		{“remove”: {“index”: “harvard”,”alias”:”university”}},
+		{“add” : {“index”: “harvard”,”alias”:”ivy”}}
+	]
+}
+
+#Using wildcard with Alias by Example
+POST /_aliases
+{
+	“actions”: [
+		{“add”: {“index”: “uni*”,”alias”:”university_logs”}}
+	]
+}
+
+#Disk space allocation by Example
+POST /_cluster/settings
+{
+	“transient”: {
+		“cluster.routing.allocation.disk.watermark.low”:”80%”,
+		“cluster.routing.allocation.disk.watermark.high”:”50GB”,
+		“cluster.info.update.interval”:”1m”
+	}
+}
+
+
+#Close an index
+POST /the_index/_close
+
+#Open an index
+POST /the_index/_open
+
+#Close multiple indices
+POST /the_index,the_index2,the_index3/_close
+
+#Close all indices
+POST /_all/_close
+
+#Close all indices using wildcard
+POST /uni*/_close
+
+
+
+#2.3
+
+#index created
+POST /logs-000001 {
+	“aliases”: {
+		“my_logs”: {} #alias
+	}
+}
+
+#running rollover
+POST /my_logs/_rollover
+{
+	“conditions”: {
+		“max_age”: “8d”,
+		“max_docs”: 1000
+	}
+}
+
+
+#Rollover: Explicitly Naming Index
+POST /my_logs/_rollover/new_index_name
+{
+	“conditions”: {
+		“max_age”:”8d”,
+		“max_docs”: 1000
+	}
+}
+
+
+
+#Date Math with Rollover
+PUT /%3Ciot-%7Bnow%2Fd%7D-1%3E
+{
+	“aliases” : {
+		“my_logs” : {}
+	}
+}
+
+POST /my_logs/_rollover
+{
+	“conditions”: {
+		“max_docs”:”1000”
+	}
+}
+
+
+#3.1
+#Search
+GET /the_index/doc/_search?explain
+{
+	“query”: {
+		“term”: {
+			“text”:”Harvard”
+		}
+	}
+}
+
+
+#3.2
+#Boosting by Example
+{
+	"query": {
+		"bool": {
+			"should": [
+				{
+					"match" : {
+						"title": {
+							"query": "the best search technology"
+							"boost": 5
+						}
+					}
+				},
+				{
+					"match" : {
+						"message": "lucene is great"
+					}
+				}
+			]
+		}
+	}
+}
+
+
+#Inline boosting
+{
+	“multi_match”: {
+		”query”:”ElasticSearch is the best”,
+		“fields”: [“title^5”,”message”]
+	}
+}
+
+
+#3.3
+#Query Rescoring by Example
+POST /_search
+{
+	"query": {
+		"match" : {
+			"message" : {
+				"operator" : "or",
+				"query" : "the best search technology"
+			}
+		}
+	},
+	"rescore": {
+		"window_size":50, #number of results to rescore
+		"query": {
+			"score_mode":"total",
+			"rescore_query": {
+				"match_phrase": {
+					"message": {
+						"query":"the best search technology"
+					}
+				}
+			},
+			"query_weight" : 0.7,
+			"rescore_query_weight":1.2
+		}
+	}
+}
+
+#Production Cluster ##############
+#4.1
+
+#dedicated master node
+#elasticsearch.yml config
+node.master: true
+node.data: false
+node.ingest: false
+
+#dedicated data node
+#elasticsearch.yml config
+node.master: false
+node.data: true
+node.ingest: false
+
+#dedicated client node
+#elasticsearch.yml config
+node.master: false
+node.data: false
+node.ingest: false
+
+
+#Ingest Node
+#elasticsearch.yml config
+node.master: false
+node.data: false
+node.ingest: true
+search.remote.connect: false
+
+
+#4.2
+
+#Set minimum master nodes dynamically:
+PUT /_cluster/settings
+{
+     "persistent": {
+          "discovery.zen.minimum_master_nodes": 2
+     }
+}
+
+#Node naming in elasticsearch.yml file
+node.name: node_unique_name
+#or
+node.name: ${HOSTNAME}
+
+
+
+
+
+
+#Security ########################
+#5.1
+#Changing Default Password
+
+#ElasticSearch
+PUT _xpack/security/user/elastic/_password
+{
+	"password": "newElasticPassword"
+}
+
+#Kibana
+PUT _xpack/security/user/kibana/_password
+{
+	"password": "newKibanaPassword"
+}
+
+. /path/to/kibana.yml
+	elasticsearch.password: newKibanaPassword
+
+
+#Logstash
+PUT _xpack/security/user/logstash_system/_password
+{
+	"password": "newLogstashPassword"
+}
+
+. /path/to/logstash.yml
+	xpack.monitoring.elasticsearch.password: newLogstashPassword
+
+
+
+
+#5.2
+POST /_xpack/security/user/eanthony
+{
+	"password": "awesome@xresults",
+	"roles": ["admin","create_books"],
+	"full_name": "Ethan Anthony",
+	"email": "ea@xresults.com",
+	"metadata": {
+		"interests": ["AI","ML","Shared Analytics","cross analytics", "fitness","latin"],
+		"position": "founder",
+		"languages": ["Chinese","Japanese","English"]
+	}
+
+}
+
+#Note that to retrieve user information we can simply do the following: 
+GET /_xpack/security/user/eanthony
+
+#To get all users you can replace the user name with the word user
+GET /_xpack/security/user/user
+
+#To delete a user you simply use the DELETE verb as such:
+DELETE /_xpack/security/user/msmith
+
+#5.3
+POST /_xpack/security/role/books_admin
+{
+	"run_as": ["test_role1","test_role2"],
+	"cluster": ["monitor"],
+	"indices": [
+		{
+			"names": ["books-*"],
+			"privileges": ["read"],
+			"field_security": {
+				"grant": ["name","tags","@timestamp"]
+			}
+		}
+	]
+
+}
+
+GET /_xpack/security/role/books_admin
+
+DELETE /_xpack/security/role/books_admin
+
+#5.5
+PUT /_cluster/settings
+{
+	"persistent": {
+		"xpack.security.http.filter.deny": "174.23.0.0/24"
+	}
+}
+
+
+
+#Section 7 -> Backups
+
+
+
+#7.2
+
+#Create repository
+#Create repo path in elasticsearch.yml
+path.repo: ["/absolute/path/to/location/for/backups", "…."]
+
+#Create repo
+PUT /_snapshot/es_backup
+{
+	"type": "fs",
+	"settings": {
+		"location": "/absolute/path/to/location/for/backups",
+		"compress": true
+	}
+}
+
+#Create snapshot named snapshot_1
+PUT /_snapshot/es_backups/snapshot_1?wait_for_completion=true
+
+#Viewing snapshots
+
+#view snapshot_1
+GET /_snapshot/es_backup/snapshot_1
+
+#view all snapshots
+GET /_snapshot/es_backup/_all
+
+#view current snapshot (if running)
+GET /_snapshot/es_backup/_current
+
+
+#Deleting Snapshots
+
+#delete snapshot -> snapshot_1
+DELETE /_snapshot/es_backup/snapshot_1
+
+#delete repository -> es_backup
+DELETE /_snapshot/es_backup
+
+
+#Restore snapshots
+
+#Restore snapshot_1
+POST /_snapshot/es_backup/snapshot_1/_restore
+
+#Restore index_1 and index_2, ignore unavailable indices
+POST /_snapshot/es_backup/snapshot_1/_restore
+{
+     "indices": "index_1,index_2",
+     "ignore_unavailable": true,
+     "include_global_state": true
+}
+
+
+#Machine Learning#############
+#8.2
+#pattern for feeding data to model
+POST _xpack/ml/anomaly_detectors/<job_id>/_data --data-binary @<data-file.json>
+
+#job_id => name given to job
+@<data-file.json> => name of json file that contains data (MUST be in JSON format)
+
+
+
+
+
+
+
+
+
+
